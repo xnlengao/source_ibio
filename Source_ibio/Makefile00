@@ -1,0 +1,52 @@
+#Makefile for uclibc
+CROSS=
+CROSS=arm-uclibc-
+CC=$(CROSS)gcc
+CFLAGS=	
+
+HEADFILE=dllist.h IncludeFiles.h Global.h DataStruct.h General_Funcs.h Init_Funcs.h DataManage.h Serial_Funcs.h \
+			ExtDevice_Funcs.h PM9K.h Dialog.h DrawWave.h Menu.h AlarmManage.h Nibp_Measure.h \
+			NewDrawWave.h Printer_Funcs.h Central.h arr.h arr_filterQRS.h arr_detectQRS.h arr_analysis.h
+
+OBJECT=Language.o dllist.o main.o General_Funcs.o Init_Funcs.o DataManage.o Serial_Funcs.o WULine.o \
+			AlarmManage.o AlarmView.o AlarmJudgment.o AlarmSound.o AlarmLight.o SetColor.o\
+			ExtDevice_Funcs.o PM9K.o GUI_Main.o AdjustNumber.o KeyInput.o Keyboard.o\
+			DlgSet_ACK.o DlgSet_System.o DlgSet_Time.o DlgSet_Patient.o DlgSet_AlarmControl.o DlgSet_AlarmPrint.o \
+			DlgSet_View.o DlgSet_Color.o DlgSet_Wave.o DlgSet_ViewSet.o DlgSet_AlarmLimit.o \
+			DlgSet_Ecg.o DlgSet_EcgSet.o DlgSet_SpO2.o DlgSet_PR.o Dlg_User.o \
+			DlgSet_Resp.o DlgSet_Temp.o DlgSet_Nibp.o DlgSet_NibpSet.o DlgSet_Ibp1.o  DlgSet_Ibp2.o \
+			DlgSet_Alarm.o TrendManage.o ShortTrend.o TrendView.o TrendGraph.o TrendTable.o \
+			DrawWave.o DrawWaveThread.o ViewData.o Sound.o Nibp_Measure.o ScreenReview.o \
+			RealSave.o AlarmReview.o oxyCRG.o NibpList.o WaveReview.o \
+			CO2_cpt.o DlgSet_CO2.o  Ibp2.o DlgSet_Ibp1Set.o DlgSet_Ibp2Set.o \
+			DlgSet_CO2Set.o  DlgSet_SpO2Set.o DlgSet_awRR.o DlgPowerOff.o ColorSelect.o \
+			Dlg_ParaAdjust.o Password.o DlgSet_Factory.o NibpTable.o Dlg_MaintModule.o Dlg_Freeze.o \
+			DlgSet_Default.o Printer_Funcs.o DlgSet_Printer.o DlgSet_Module.o Dlg_SysInfo.o \
+			NewDrawWave.o NewDrawWaveThread.o NewShortTrend.o NewOxyCRG.o AA_irma.o \
+			CO2_cap.o NetFunc.o NetRecv.o NetSend.o DlgSet_Net.o NellSpo2.o \
+			NetRecv_Bed.o  OtherBedView.o DlgSet_ST.o \
+			arr_filterQRS.o arr_detectQRS.o  arr_analysis.o 
+
+TT:$(OBJECT) $(HEADFILE)
+	$(CC) -Wall -s -o TT $(OBJECT)  -lpthread -lminigui -lmgext -lgtprint -lecganalysis  -lttf -ljpeg
+	cp TT /tftpboot/root/New/	
+	cp *.lng /tftpboot/root/New/
+#cp *.cfg /tftpboot/root/New/	
+	cp *.png /tftpboot/root/New/
+		
+test:test.o 
+	$(CC) -o test test.c Serial_Funcs.o -lpthread
+	cp test /tftpboot/root/New/	
+
+PHONY:clean
+install:
+	cp TT /tftpboot/root/New/	
+	cp *.lng /tftpboot/root/New/
+#cp *.cfg /tftpboot/root/New/	
+	cp *.png /tftpboot/root/New/
+	
+clean:
+	rm  *.o -f
+	rm TT -f
+
+

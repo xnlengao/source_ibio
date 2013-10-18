@@ -1,0 +1,286 @@
+/*************************************************************************** 
+ *	Module Name:	NewDrawWave
+ *
+ *	Abstract:	新的绘图程序
+ *
+ *	Revision History:
+ *	Who		When		What
+ *	--------	----------	-----------------------------
+ *	Name		Date		Modification logs
+ *				2008-01-21 14:47:44
+ ***************************************************************************/
+#ifndef __NEWDRAWWAVE_H__
+#define __NEWDRAWWAVE_H__
+
+////////////////////// 绘图显示区域坐标 ////////////////////////
+#if SCREEN_1024
+#define HEIGHT_CTL				205
+#define LENGTH_ST				125
+#define OB_HEIGHT				HEIGHT_CTL		
+#define IBP_HEIGHT				125
+#elif	SCREEN_640					
+#define HEIGHT_CTL				135
+#define LENGTH_ST				100
+#define OB_HEIGHT				180	//它床8寸大小设置
+#define IBP_HEIGHT				100
+#else
+#define HEIGHT_CTL				165
+#define LENGTH_ST				125
+#define OB_HEIGHT				HEIGHT_CTL
+#define IBP_HEIGHT				125
+#endif
+
+//NORMAL
+#define RC_NORMAL_LEFT			(SCREEN_LEFT)
+#define RC_NORMAL_TOP			(SCREEN_TOP+35)
+#define RC_NORMAL_RIGHT		(PARAVIEW_LEFT-25)	
+#define RC_NORMAL_BOTTOM		(SCREEN_BOTTOM)
+//Short Trend
+#define RC_SHORTTREND_LEFT		(SCREEN_LEFT)	
+#define RC_SHORTTREND_TOP			(SCREEN_TOP+35)		
+#define RC_SHORTTREND_RIGHT		(PARAVIEW_LEFT-25-LENGTH_ST)		
+#define RC_SHORTTREND_BOTTOM		(SCREEN_BOTTOM)	
+//MultiECG
+#define RC_MECG_LEFT			(SCREEN_LEFT)	
+#define RC_MECG_TOP			(SCREEN_TOP+35)
+#define RC_MECG_RIGHT			(PARAVIEW_LEFT-25)
+#define RC_MECG_BOTTOM		(SCREEN_BOTTOM)
+//Big Char
+ #define RC_BIGCHAR_LEFT		(SCREEN_LEFT)	
+ #define RC_BIGCHAR_TOP			(SCREEN_TOP+35)
+ #define RC_BIGCHAR_RIGHT		(PARAVIEW_LEFT-25)
+ #define RC_BIGCHAR_BOTTOM		(SCREEN_BOTTOM-HEIGHT_CTL)
+//NIBP List
+ #define RC_NIBPLIST_LEFT			(SCREEN_LEFT)	
+ #define RC_NIBPLIST_TOP			(SCREEN_TOP+35)
+ #define RC_NIBPLIST_RIGHT		(PARAVIEW_LEFT-25)
+ #define RC_NIBPLIST_BOTTOM		(SCREEN_BOTTOM-HEIGHT_CTL)
+//OxyCRG
+#define RC_OXYCRG_LEFT		(SCREEN_LEFT+5)
+#define RC_OXYCRG_TOP		(SCREEN_TOP+35)
+#define RC_OXYCRG_RIGHT	(PARAVIEW_LEFT-25)
+#define RC_OXYCRG_BOTTOM	(SCREEN_BOTTOM-HEIGHT_CTL)		
+//12Lead
+#define RC_12LEAD_LEFT		(SCREEN_LEFT)
+#define RC_12LEAD_TOP		(SCREEN_TOP+35)
+#define RC_12LEAD_RIGHT		(PARAVIEW_LEFT-25)
+#define RC_12LEAD_BOTTOM	(SCREEN_BOTTOM)	
+//Other bed
+#define RC_OTHERBED_LEFT		(SCREEN_LEFT)
+#define RC_OTHERBED_TOP		(SCREEN_TOP+35)
+#define RC_OTHERBED_RIGHT		(PARAVIEW_LEFT-25)
+#define RC_OTHERBED_BOTTOM	(SCREEN_BOTTOM-OB_HEIGHT)
+//Other bed
+#define RC_IBP_LEFT		(SCREEN_LEFT)
+#define RC_IBP_TOP		(SCREEN_TOP+35)
+#define RC_IBP_RIGHT		(PARAVIEW_LEFT-25)
+#define RC_IBP_BOTTOM	(SCREEN_BOTTOM-IBP_HEIGHT)
+#if 0
+#if SCREEN_1024
+#define HEIGHT_CTL				205
+//1024x768
+#define RC_NORMAL_LEFT			(SCREEN_LEFT+5)
+#define RC_NORMAL_TOP			(SCREEN_TOP+35)
+#define RC_NORMAL_RIGHT		(PARAVIEW_LEFT-25)		
+#define RC_NORMAL_BOTTOM		(SCREEN_BOTTOM)	
+//Short Trend
+#define RC_SHORTTREND_LEFT		(SCREEN_LEFT+5)	
+#define RC_SHORTTREND_TOP			(SCREEN_TOP+35)		
+#define RC_SHORTTREND_RIGHT		(PARAVIEW_LEFT-25)	
+#define RC_SHORTTREND_BOTTOM		(SCREEN_BOTTOM)	
+//Big Char
+ #define RC_BIGCHAR_LEFT		(SCREEN_LEFT)	
+ #define RC_BIGCHAR_TOP			(SCREEN_TOP+35)
+ #define RC_BIGCHAR_RIGHT		(PARAVIEW_LEFT-25)
+ #define RC_BIGCHAR_BOTTOM		(SCREEN_BOTTOM-HEIGHT_CTL)
+ //NIBP List
+ #define RC_NIBPLIST_LEFT		(SCREEN_LEFT)	
+ #define RC_NIBPLIST_TOP			(SCREEN_TOP+35)
+ #define RC_NIBPLIST_RIGHT		(PARAVIEW_LEFT-25)
+ #define RC_NIBPLIST_BOTTOM		(SCREEN_BOTTOM-HEIGHT_CTL)
+//MultiECG
+#define RC_MECG_LEFT			(SCREEN_LEFT+5)	
+#define RC_MECG_TOP			(SCREEN_TOP+35)
+#define RC_MECG_RIGHT			(PARAVIEW_LEFT-25)
+#define RC_MECG_BOTTOM		(SCREEN_BOTTOM)
+//OxyCRG
+#define RC_OXYCRG_LEFT		(SCREEN_LEFT+5)
+#define RC_OXYCRG_TOP		(SCREEN_TOP+35)
+#define RC_OXYCRG_RIGHT	(PARAVIEW_LEFT-25)
+#define RC_OXYCRG_BOTTOM	(SCREEN_BOTTOM-HEIGHT_CTL)		//250	
+//12Lead
+#define RC_12LEAD_LEFT		(SCREEN_LEFT+5)
+#define RC_12LEAD_TOP		(SCREEN_TOP+35)
+#define RC_12LEAD_RIGHT		(PARAVIEW_LEFT-25)
+#define RC_12LEAD_BOTTOM	(SCREEN_BOTTOM-HEIGHT_CTL)		//250	
+//Other bed
+#define RC_OTHERBED_LEFT		(SCREEN_LEFT)
+#define RC_OTHERBED_TOP		(SCREEN_TOP+35)
+#define RC_OTHERBED_RIGHT		(PARAVIEW_LEFT-25)
+#define RC_OTHERBED_BOTTOM	(SCREEN_BOTTOM-HEIGHT_CTL)	
+#elif	SCREEN_640
+#define HEIGHT_CTL				135
+//NORMAL
+#define RC_NORMAL_LEFT			(SCREEN_LEFT)
+#define RC_NORMAL_TOP			(SCREEN_TOP+35)
+#define RC_NORMAL_RIGHT		(PARAVIEW_LEFT-25)	
+#define RC_NORMAL_BOTTOM		(SCREEN_BOTTOM)
+//Short Trend
+#define RC_SHORTTREND_LEFT		(SCREEN_LEFT)	
+#define RC_SHORTTREND_TOP			(SCREEN_TOP+35)		
+#define RC_SHORTTREND_RIGHT		(PARAVIEW_LEFT-150)		
+#define RC_SHORTTREND_BOTTOM		(SCREEN_BOTTOM)	
+//MultiECG
+#define RC_MECG_LEFT			(SCREEN_LEFT)	
+#define RC_MECG_TOP			(SCREEN_TOP+35)
+#define RC_MECG_RIGHT			(PARAVIEW_LEFT-25)
+#define RC_MECG_BOTTOM		(SCREEN_BOTTOM)
+//Big Char
+ #define RC_BIGCHAR_LEFT		(SCREEN_LEFT)	
+ #define RC_BIGCHAR_TOP			(SCREEN_TOP+35)
+ #define RC_BIGCHAR_RIGHT		(PARAVIEW_LEFT-25)
+ #define RC_BIGCHAR_BOTTOM		(SCREEN_BOTTOM-135)
+//NIBP List
+ #define RC_NIBPLIST_LEFT			(SCREEN_LEFT)	
+ #define RC_NIBPLIST_TOP			(SCREEN_TOP+35)
+ #define RC_NIBPLIST_RIGHT		(PARAVIEW_LEFT-25)
+ #define RC_NIBPLIST_BOTTOM		(SCREEN_BOTTOM-135)
+//OxyCRG
+#define RC_OXYCRG_LEFT		(SCREEN_LEFT)
+#define RC_OXYCRG_TOP		(SCREEN_TOP+35)
+#define RC_OXYCRG_RIGHT	(PARAVIEW_LEFT-25)
+#define RC_OXYCRG_BOTTOM	(SCREEN_BOTTOM-135)		
+//12Lead
+#define RC_12LEAD_LEFT		(SCREEN_LEFT)
+#define RC_12LEAD_TOP		(SCREEN_TOP+35)
+#define RC_12LEAD_RIGHT		(PARAVIEW_LEFT-25)
+#define RC_12LEAD_BOTTOM	(SCREEN_BOTTOM)	
+//Other bed
+#define RC_OTHERBED_LEFT		(SCREEN_LEFT)
+#define RC_OTHERBED_TOP		(SCREEN_TOP+35)
+#define RC_OTHERBED_RIGHT		(PARAVIEW_LEFT-25)
+#define RC_OTHERBED_BOTTOM	(SCREEN_BOTTOM-180)	
+#else 
+#define HEIGHT_CTL				160
+//NORMAL
+#define RC_NORMAL_LEFT			(SCREEN_LEFT)
+#define RC_NORMAL_TOP			(SCREEN_TOP+35)
+#define RC_NORMAL_RIGHT		(SCREEN_RIGHT-270)	
+#define RC_NORMAL_BOTTOM		(SCREEN_BOTTOM)
+//Short Trend
+#define RC_SHORTTREND_LEFT		(SCREEN_LEFT)	
+#define RC_SHORTTREND_TOP			(SCREEN_TOP+35)		
+#define RC_SHORTTREND_RIGHT		(SCREEN_RIGHT-400)		
+#define RC_SHORTTREND_BOTTOM		(SCREEN_BOTTOM)	
+//MultiECG
+#define RC_MECG_LEFT			(SCREEN_LEFT)	
+#define RC_MECG_TOP			(SCREEN_TOP+35)
+#define RC_MECG_RIGHT			(SCREEN_RIGHT-270)
+#define RC_MECG_BOTTOM		(SCREEN_BOTTOM)
+
+//Big Char
+ #define RC_BIGCHAR_LEFT		(SCREEN_LEFT)	
+ #define RC_BIGCHAR_TOP			(SCREEN_TOP+35)
+ #define RC_BIGCHAR_RIGHT		(SCREEN_RIGHT-270)
+ #define RC_BIGCHAR_BOTTOM		(SCREEN_BOTTOM-HEIGHT_CTL)
+//NIBP List
+ #define RC_NIBPLIST_LEFT			(SCREEN_LEFT)	
+ #define RC_NIBPLIST_TOP			(SCREEN_TOP+35)
+ #define RC_NIBPLIST_RIGHT		(SCREEN_RIGHT-270)
+ #define RC_NIBPLIST_BOTTOM		(SCREEN_BOTTOM-HEIGHT_CTL)
+//OxyCRG
+#define RC_OXYCRG_LEFT		(SCREEN_LEFT)
+#define RC_OXYCRG_TOP		(SCREEN_TOP+35)
+#define RC_OXYCRG_RIGHT	(SCREEN_RIGHT-270)
+#define RC_OXYCRG_BOTTOM	(SCREEN_BOTTOM-HEIGHT_CTL)		
+//12Lead
+#define RC_12LEAD_LEFT		(SCREEN_LEFT)
+#define RC_12LEAD_TOP		(SCREEN_TOP+35)
+#define RC_12LEAD_RIGHT		(SCREEN_RIGHT-270)
+#define RC_12LEAD_BOTTOM	(SCREEN_BOTTOM-HEIGHT_CTL)	
+//Other bed
+#define RC_OTHERBED_LEFT		(SCREEN_LEFT)
+#define RC_OTHERBED_TOP		(SCREEN_TOP+35)
+#define RC_OTHERBED_RIGHT		(SCREEN_RIGHT-270)
+#define RC_OTHERBED_BOTTOM	(SCREEN_BOTTOM-HEIGHT_CTL)	
+#endif
+#endif
+
+//波形参数区域的宽度
+#define PARAOFWAVE_WIDTH	200//60
+
+//波形面板之间的间隔
+#define PANELAREA_INTER	1		
+
+// //一个定时器周期(20ms)需画的点数, 根据采样率计算 
+// //200Hz
+// #define DRAWWAVENUM_200HZ	4
+//一个定时器周期(20ms)需画的点数, 根据采样率计算
+
+//250Hz
+#define DRAWWAVENUM_200HZ		5        //4
+//扫描棒的宽度
+#define FILLWAVE_WIDTH			5
+
+//一屏可容纳的最多波形面板数量
+#define NWAVEPANEL_MAX_COUNT	13
+#define PARATEXTCOLOR   COLOR_darkgray
+//波形类型标识
+#define NWID_NONE			0
+#define NWID_ECG1			1
+#define NWID_ECG2			2
+#define NWID_SPO2			3
+#define NWID_RESP			4
+#define NWID_IBP1			5
+#define NWID_IBP2			6
+#define NWID_CO2			7
+#define NWID_MULTIECG		8    		//7道心电
+#define NWID_12LEAD			9    		//12道心电
+#define NWID_MAX 			NWID_MULTIECG
+
+//单个波形面板配置,用户配置
+typedef struct {
+	BYTE bID;		//波形类型标识
+	BOOL bSwitch;	//显示与否的开关 SWITCH_OFF, SWITCH_ON 	
+}NWAVE_CFG, *PNWAVE_CFG;
+	
+//单个绘图面板
+typedef struct {
+	BYTE bWaveID;		//波形类型标识
+	RECT rcWave;		//波形绘制区域
+	RECT rcPara;			//参数绘制区域
+	BOOL bCascade;		//是否级联
+	BYTE bWaveCount;	//区域内绘制的波形数量	
+	float fXAxis;			//X轴系数
+	float fYAxis;			//Y轴系数	
+}NWAVE_PANEL, *PNWAVE_PANEL;
+
+//各个波形的限值
+#define NWAVEMAX_ECG		4095
+#define NWAVEMAX_SPO2		255
+#define NWAVEMAX_RESP		255
+#define NWAVEMAX_CO2		100
+#define NWAVEMAX_IBP		400
+
+//采样频率(各个波形采用相同的采样频率)
+#define NSAMPLERATE		200
+
+//20ms 绘图定时器的分辨率
+#define TIMER_DRAW	20000
+//1sec
+#define TIMER_1S		1000000			
+//500ms
+#define TIMER_500MS		500000
+//200ms
+#define TIMER_200MS		200000			
+//100ms
+#define TIMER_100MS		100000			
+//50ms
+#define TIMER_50MS		50000		
+//2s
+#define TIMER_2S		2000000				
+//1min
+#define TIMER_1M		TIMER_1S*60
+
+
+#endif //__NEWDRAWWAVE_H__
