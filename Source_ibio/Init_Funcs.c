@@ -17,6 +17,11 @@
 //用户对波形面板的配置, 适用于:  Normal, Short Trend, Nibp List
 extern WAVE_PANEL_CFG gWaveCfg_User[WAVEPANEL_MAX_COUNT];
 
+static int CheckConfigFiles()
+{
+	
+	return 0;
+}
 /*
 	加载机器和系统配置文件
 */
@@ -25,6 +30,7 @@ static int LoadConfigFiles()
 	int res;
 	
 	//TODO:此处要对文件的存在与完整性进行检查
+	CheckConfigFiles();
 	
 	//加载机器配置文件	
 	snprintf(gFileMachineConfig, sizeof gFileMachineConfig, CFGPATH_MACHINE);
@@ -1714,20 +1720,7 @@ static int InitCfg_GlobalSetup(const unsigned char *pCfgFiles)
 
 
 
-/*
-	初始化DEMO文件ID
-*/
-static int  InitDemoFiles()
-{
-	gfileDemo_PM9K = NULL;
-	gbSaveDemo_PM9K = FALSE;
-	gfileDemo_IBP = NULL;
-	gbSaveDemo_IBP = FALSE;
-	gfileDemo_CO2 = NULL;
-	gbSaveDemo_CO2 = FALSE;
-	
-	return 0;
-}
+
 
 //加载校准系数
 static int LoadAdjust()
@@ -1779,9 +1772,6 @@ static int LoadAdjust()
 */
 int InitSystem()
 {
-	
-	//默认使用非41的主板
-	gbPMVer41 = FALSE;
 	
 	//加载配置文件	
 	LoadConfigFiles();	
@@ -1974,7 +1964,7 @@ int LoadFonts()
 	gFontTTF_90Bk = CreateLogFont ("ttf", "arialbk", "ISO8859-1", 
 				     FONT_WEIGHT_REGULAR, FONT_SLANT_ROMAN, FONT_SETWIDTH_NORMAL,
 				     FONT_SPACING_CHARCELL, FONT_UNDERLINE_NONE, FONT_STRUCKOUT_NONE, 
-			     	     90, 0);		     
+			     	     85, 0);		     
 	gFontTTF_105 = CreateLogFont ("ttf", "arialbk", "ISO8859-1", 
 				      FONT_WEIGHT_REGULAR, FONT_SLANT_ROMAN, FONT_SETWIDTH_NORMAL,
 	  				FONT_SPACING_CHARCELL, FONT_UNDERLINE_NONE, FONT_STRUCKOUT_NONE, 

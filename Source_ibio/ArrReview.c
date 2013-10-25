@@ -74,7 +74,7 @@ static DLGTEMPLATE DlgSet = {
 //	50, 175, 535, 335-50,   
 	50, 175, 535-115, 335-50,    
 #else
-	50, 175, 535, 335-50,   
+	50, 175, 535, 205,   
 #endif
 	"",
 	0, 0,
@@ -1156,9 +1156,9 @@ static int DrawStatus(HWND hWnd)
 // 	Rectangle(hdc, gRcStatus.left, gRcStatus.top, gRcStatus.right, gRcStatus.bottom);
 	
 	if(gCfgSystem.bLanguage == LANGUAGE_SPANISH)
-		snprintf(strStatus, sizeof strStatus, " %d / %d", giCurPage, giPageCount);
+		snprintf(strStatus, sizeof strStatus, " %.02d / %.02d", giCurPage, giPageCount);
 	else
-		snprintf(strStatus, sizeof strStatus, " %d / %d", giCurEvent, gAlmDataCount);
+		snprintf(strStatus, sizeof strStatus, " %.02d / %.02d", giCurEvent, gAlmDataCount);
 	
 	DrawText(hdc, strStatus, -1,&gRcStatus,  DT_NOCLIP | DT_SINGLELINE | DT_VCENTER | DT_LEFT);
 	
@@ -1534,16 +1534,16 @@ if(gCfgSystem.bInterface==SCREEN_NORMAL||gCfgSystem.bInterface==SCREEN_7LEADECG
 		||gCfgSystem.bInterface==SCREEN_MULTIECG||gCfgSystem.bInterface==SCREEN_SHORTTREND){
 		High_Dlg=0;
 	}else
-		High_Dlg=130;
+		High_Dlg=205;
 #if SCREEN_1024
 	DlgSet.x = SCREEN_LEFT+100,
 	DlgSet.y = SCREEN_TOP+180, 
 #elif SCREEN_640
 	DlgSet.x = SCREEN_LEFT,
-	DlgSet.y = SCREEN_BOTTOM-205, 	
+	DlgSet.y = SCREEN_BOTTOM-160, 	
 #else
 	DlgSet.x = SCREEN_LEFT,
-	DlgSet.y = SCREEN_BOTTOM-205-High_Dlg, 		
+	DlgSet.y = SCREEN_BOTTOM-160-High_Dlg, 		
 #endif
 	
 	DlgSet.controls = CtrlSet;

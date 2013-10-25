@@ -1036,6 +1036,19 @@ int isErr_iBioNibp(const PS_NIBP_VALUE pValue)
 	//当前的状态
 	int iAlmStatus=MEASURE_OK;
 	B_ALM_INFO sAlmInfo;
+
+	switch(pValue->wFDB){
+		case NBP_FDB_MAN_START_ABT:
+		case NBP_FDB_AUTO_START_ABT:
+		case NBP_FDB_STAT_START_ABT:
+		case NBP_FDB_STC_START_ABT:
+		case NBP_FDB_LEAK_START_ABT:
+		case NBP_FDB_PVT_START_ABT:
+		case NBP_FDB_OVP_START_ABT:
+		case NBP_FDB_CAL_START_ABT:
+		break;	
+			
+	}
 		
 	//得到当前的报警状态
 	if((pValue->bCanceled || pValue->wFDB==0) && (!gbNibpProtect)){
@@ -1056,63 +1069,8 @@ int isErr_iBioNibp(const PS_NIBP_VALUE pValue)
 	else{
 		sAlmInfo.bAlmID = AT_NIBP_ERROR;
 		sAlmInfo.bStatus = ALMSTATUS_ALARM;
-/*
-
-#define NBP_FDB_TAG_PRS_ERR		0x20	//NIBP target inflate pressure set ERROR
-#define NBP_FDB_PNEU_LEAK		0x21	//NIBP measurement pneumatic leak
-#define NBP_FDB_INFL_FAIL		0x22	//NIBP measurement inflation fail ( cuff/hose not connected )
-#define NBP_FDB_DEFLT_OT		0x23	//NIBP measurement deflate overtime
-#define NBP_FDB_MEASURE_OT		0x24	//NIBP measurement  overtime
-#define NBP_FDB_PULSE_WEAK		0x25	//NIBP measurement  pulse signal too weak
-#define NBP_FDB_EXCS_PRS		0x26	//NIBP measurement pressure out of range
-
-#define NBP_FDB_SIS_CTI_OT		0x30	//NIBP Static Venipuncture Cuff Type Inflation Overtime
-#define NBP_FDB_SIS_CTC_OT		0x31	//NIBP Static Venipuncture Cuff Type Check Overtime
-#define NBP_FDB_SIS_CTW_OT		0x32	//NIBP Static Venipuncture Cuff Type Wait Overtime
-#define NBP_FDB_SIS_CTD_OT		0x33	//NIBP Static Venipuncture Cuff Type Deflation Overtime
-#define NBP_FDB_SIS_CTR_OT		0x34	//NIBP Static Venipuncture Cuff Type Resolution Overtime
-#define NBP_FDB_SIS_PRO_OT		0x35	//NIBP Static Venipuncture Process Overtime
-
-		switch(pValue->wFDB){
-			case NBP_FDB_TAG_PRS_ERR:	//初始化压力出错 //low
-			case NBP_FDB_PNEU_LEAK:		//漏气
-			case NBP_FDB_TAG_PRS_ERR:
-			case NBP_FDB_TAG_PRS_ERR:		
-			case NBP_FDB_TAG_PRS_ERR:
-			case NBP_FDB_TAG_PRS_ERR:
-			case NBP_FDB_TAG_PRS_ERR:
-		}
-*/
-		//根据不同的测量错误，定义报警级别
-		if((pValue->wErrCode) & NIBP_ERR_CUFF_TOOLAX){//袖带过松 
-			sAlmInfo.bClass = ALARM_LOW;		
-		}else if((pValue->wErrCode) & NIBP_ERR_CUFF_LEAK){//漏气 
-			sAlmInfo.bClass = ALARM_LOW;		
-		}else if((pValue->wErrCode) & NIBP_ERR_PRESSURE){//气压错误 
-			sAlmInfo.bClass = ALARM_LOW;		
-		}else if((pValue->wErrCode) & NIBP_ERR_WEAK_SIGNAL){//微弱信号
-			sAlmInfo.bClass = ALARM_LOW;	
-		}else if((pValue->wErrCode) & NIBP_ERR_OVER_RANGE){//超范围
-			sAlmInfo.bClass = ALARM_LOW;		
-		}else if((pValue->wErrCode) & NIBP_ERR_EXCESSIVE_MOTION){//过分运动
-			sAlmInfo.bClass = ALARM_HIGH;		
-		}else if((pValue->wErrCode) & NIBP_ERR_OVERPRESSURE){//过压
-			sAlmInfo.bClass = ALARM_HIGH;		
-		}else if((pValue->wErrCode) & NIBP_ERR_SIGNAL_SATURATION){//信号饱和 
-			sAlmInfo.bClass = ALARM_HIGH;		
-		}else if((pValue->wErrCode) & NIBP_ERR_CHECKLEAK){//漏气检测失败
-			sAlmInfo.bClass = ALARM_LOW;		
-		}else if((pValue->wErrCode) & NIBP_ERR_MODULE_FAULT){//系统错误 
-			sAlmInfo.bClass = ALARM_LOW;		
-		}else if((pValue->wErrCode) & NIBP_ERR_TIMEOUT){//超时
-			sAlmInfo.bClass = ALARM_HIGH;		
-		}else if((pValue->wErrCode) & NIBP_ERR_CUFF_MISTAKE){//袖带类型错
-			sAlmInfo.bClass = ALARM_LOW;		
-		}
-		else{
-			sAlmInfo.bClass = ALARM_INFO;		
-		}
-
+		
+		
 		if(iAlmStatus == MEASURE_ERROR){
 			//Add	
 			AddAlarm_Tec(sAlmInfo);

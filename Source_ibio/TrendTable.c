@@ -202,14 +202,13 @@ static int SortTrendData()
 	
 	if(wHead < wTail){
 
-		for(i=wTail; i<wSize; i++){
+		for(i=wTail; i<=(wSize-1); i++){
 			
 			gSortedTrendDatas.Datas[gSortedTrendDatas.wHeadIndex++] = gTrendDatas.Datas[i]; 
 			//gSortedTrendDatas.Datas[0]=gTrendDatas.Datas[i]; 
 			iCount++;
 		}
 		for(i=0; i<=wHead; i++){
-		
 			//gSortedTrendDatas.wHeadIndex ++;
 			gSortedTrendDatas.Datas[gSortedTrendDatas.wHeadIndex++] = gTrendDatas.Datas[i]; 
 			//gSortedTrendDatas.Datas[0]=gTrendDatas.Datas[i]; 
@@ -228,8 +227,8 @@ static int SortTrendData()
 	}
 	else{
 		for(i=(wTail+1); i<wHead; i++){
-		//	gSortedTrendDatas.wHeadIndex ++;	
-			gSortedTrendDatas.Datas[gSortedTrendDatas.wHeadIndex++] = gTrendDatas.Datas[i]; 
+			gSortedTrendDatas.wHeadIndex ++;	
+			gSortedTrendDatas.Datas[gSortedTrendDatas.wHeadIndex] = gTrendDatas.Datas[i]; 
 			iCount++;
 		}
 	}
@@ -350,10 +349,7 @@ static int DlgProcTrendTable(HWND hDlg, int message, WPARAM wParam, LPARAM lPara
 			gbTrendStatus=1;			
 			hWndSelf = hDlg;
 			hWnd_TrendTable=hDlg;
-			printf("111*******hWndSelf=%x\n",hWndSelf);
 			
-
-				
 			memset(strMenu, 0, sizeof strMenu);
 			GetStringFromResFile(gsLanguageRes, "TRENDTABLE", "caption", strMenu, sizeof strMenu);	
 			SetWindowCaption(hDlg, strMenu);
@@ -402,11 +398,11 @@ static int DlgProcTrendTable(HWND hDlg, int message, WPARAM wParam, LPARAM lPara
 			btnOK = CreateWindow("button", strMenu, WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
 					     DID_TT_OK, 5, 160, 70, 26, hDlg, 0);
 			OldBtnProc = SetWindowCallbackProc(btnOK, BtnProc);
-			printf("2222*******hWndSelf=%x\n",hWndSelf);
+			
 			//对趋势数组排序
 			SortTrendData();
 			SetFocus(btnOK);
-			printf("33333*******hWndSelf=%x\n",hWndSelf);
+			
 		}break;
 		case MSG_PAINT:{
 			InitTrendTable(hDlg);
@@ -542,22 +538,22 @@ static int InitTableRects(HWND hWnd)
 	int iCount;			//可变列的数量
 	int iTotalWidth;		//可变列所占的总宽度	
 	int iItemWidth;		//可变列项目所占的宽度
-	printf("aaaaaaaaaaaa\n");
+
 	
 	if(hWnd == (HWND)NULL){ printf("++++++++\n"); return -1;}
-	printf("99999999999999\n");
+
 	//获得窗口的区域
 	GetClientRect(hWnd, &rcWnd);
-	printf("bbbbbbbbbbbbbb\n");	
+
 	//设置框架的区域, 去掉左边的操作区域
 	SetRect(&gRcTableFrame, rcWnd.left+85, rcWnd.top+1, rcWnd.right-1, rcWnd.bottom-1);
-	printf("cccccccccccccc\n");
+
 	//根据最大行数计算行的高度
 	giRowHeight = (gRcTableFrame.bottom - gRcTableFrame.top)/(ROW_MAXCOUNT+1);	 //包括status
 	
 	//设置状态的区域
 	SetRect(&gRcTableStatus, gRcTableFrame.left, gRcTableFrame.top, gRcTableFrame.right, gRcTableFrame.top+giRowHeight + giRowHeight/4-10);
-	printf("ddddddddddd\n");
+
 
 	//设置内容的区域
 	//固定列(Mark & Time)

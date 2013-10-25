@@ -152,7 +152,7 @@ static int Power_Analyze(unsigned char*data,int len)
 		IsAlm_Power(data,FALSE);
 		
 	}
-	printf("-----%d,%d\n",data[0]&0x01<<1,show_power_flag);
+	//printf("-----%d,%d\n",data[0]&0x01<<1,show_power_flag);
 	if(data[0]&0x01<<1&&show_power_flag){ ///0=Power Key Pressed, 1=Power Key Release
 		if(B_PRINTF&&debug)	printf("HEAD[1]------Power Key Release\n");
 		CMD_Power(POWER_CLN_KEY);

@@ -997,7 +997,7 @@ static int MainWinProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
 			}
 	
 		//	gbViewDemoData=TRUE;
-			 CreateARRAlarmReview(hWnd);
+			// CreateARRAlarmReview(hWnd);
 		}break;
 		case MSG_TIMER:{
 			static BYTE bAlmViewTimerCount = 0;
@@ -1292,7 +1292,7 @@ static int MainWinProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
 				}
 				loop=(loop+1)%3;	
 				*/
-				
+			//	RecOneTrendRecord(TRENDNIBP);
 				
 				
 		#if  0

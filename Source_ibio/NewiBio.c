@@ -83,8 +83,8 @@ extern HDC hdcWave;
 extern NWAVE_PANEL gNWavePanels[NWAVEPANEL_MAX_COUNT];
 //模块对应的串口号，此处使用变量而不是宏，是为了以后可以动态分配串口
 
-static int gSerialIndex_newiBio = DEV_SERIAL0;		//RS232
-//int gSerialIndex_newiBio = DEV_SERIAL2;		//RSttf
+//static int gSerialIndex_newiBio = DEV_SERIAL0;		//RS232
+int gSerialIndex_newiBio = DEV_SERIAL2;		//RSttf
 //模块对应的串口设备
 int gfdSerial_newiBio = -1;
 
@@ -92,7 +92,7 @@ int gfdSerial_newiBio = -1;
 sem_t semSend_newiBio;
 
 //串口接收缓冲
-#define RECVBUFF_MAX_IBIO		128
+#define RECVBUFF_MAX_IBIO		512
 
 //定义报文的最小长度
 #define PACK_MIN_LENGTH_IBIO		15
@@ -122,7 +122,7 @@ BOOL gbNibpLeak = FALSE;
 
 
  int gbHaveBeep_QRS;
- int gST_templet[500];
+ int gST_templet[250];
  extern BOOL gbHavePack;
  extern BOOL gbHaveBeep_Pulse;
 #define DEMO_ECG_COUNT 		188
@@ -317,38 +317,40 @@ static int iBio_Recv(char *data, int datalen, int baudrate)
 
 	return (readlen);
 }
-#define DEMO_SPEED 50
+#define DEMO_SPEED 10000
 static unsigned int gSaveWave[DEMO_SPEED*10];
 /*
 	保存波形数据到文件中，调试用
 */
-static int SaveWaveValuetoFile()
+static int SaveWaveValuetoFile(unsigned char*data,int len)
 {
 	int i;
 	static int savecount=0;
 	
 	if(savecount<=DEMO_SPEED*10){
-	
-		gSaveWave[savecount]=gValueResp.iWave;
+		for(i=0;i<len;i++){
+			gSaveWave[savecount]=data[i];
 	//	gSaveWave[savecount]=Ch1Value;
 		
-//		if(B_PRINTF) printf("%04x %d ",gSaveWave[savecount],savecount);
 			if(savecount%DEMO_SPEED==0)
-				if(!B_PRINTF) printf("**save %d s**\n",savecount/DEMO_SPEED);
+				if(B_PRINTF) printf("**save %d s**\n",savecount/DEMO_SPEED);
 		savecount++;
+		}
 	}else{
 			savecount=0;
-			if(!B_PRINTF) printf("wave save---%d--------------------\n",savecount);
+			if(B_PRINTF) printf("wave save---%d--------------------\n",savecount);
 			FILE *fp;
-			fp  = fopen("resp_wave.bin", "w");
+			fp  = fopen("all.bin", "w");
 			
 			for(i=0;i<DEMO_SPEED*10;i++){
-
+					fprintf(fp,"%.02x ",gSaveWave[i]);
+				/*
 				if(i%10==0){
-					fprintf(fp,"\n0x%04x,",gSaveWave[i]);
+					fprintf(fp,"\n0x%02x,",gSaveWave[i]);
 				}else{
-					fprintf(fp,"0x%04x,",gSaveWave[i]);
+					fprintf(fp,"0x%02x,",gSaveWave[i]);
 				}
+				*/
 			}
 			fclose(fp);
 		}
@@ -358,7 +360,7 @@ static int SaveWaveValuetoFile()
 static int Save_net_ecg_wave()
 {
 	static BOOL bSkip;
-	
+//	return 0;
 	if(gCfgEcg.bLeadType == ECGTYPE_5LEAD){
 		// 打包网络数据	
 		gbNetWaveBuff_Ecg[giNetWaveLength_Ecg] = (gValueEcg.iWaves[ECGWAVE_I]-2047)/3+128;
@@ -387,7 +389,7 @@ static int Save_net_ecg_wave()
 static int Save_net_spo2_wave()
 {	
 	static BOOL bSkip;
-	
+//	return 0;
 	gbNetWaveBuff_SpO2[giNetWaveLength_SpO2] = (gValueSpO2.bWave*100)/256;
 	if(bSkip){
 		giNetWaveLength_SpO2=(giNetWaveLength_SpO2+1)%1000;
@@ -398,7 +400,7 @@ static int Save_net_spo2_wave()
 
 static int Save_net_resp_wave()
 {	
-	
+//	return 0;
 	gbNetWaveBuff_Resp[giNetWaveLength_Resp] = gValueResp.iWave/4;
 	giNetWaveLength_Resp=(giNetWaveLength_Resp+1)%1000;
 	
@@ -479,6 +481,7 @@ static int newiBio_Analyze(unsigned char*data,int len)
 //		for(i=0;i<len;i++) printf("%x ",data[i]);
 //		printf("\n");
 //		}
+//	SaveWaveValuetoFile(data,len);
 	if(data==NULL||len<2)
 		return -1;
 	switch(data[DATAID]&0x7f){
@@ -516,15 +519,48 @@ static int newiBio_Analyze(unsigned char*data,int len)
 	static int DemoCountEcg=0;		
 if(gbViewDemoData){
 	
-	gValueEcg.iWaves[ECGWAVE_I]=Demo_Ecg_I[DemoCountEcg];
-	gValueEcg.iWaves[ECGWAVE_II]=Demo_Ecg_II[DemoCountEcg];
-	gValueEcg.iWaves[ECGWAVE_III]=Demo_Ecg_III[DemoCountEcg];
-	gValueEcg.iWaves[ECGWAVE_V]=Demo_Ecg_V[DemoCountEcg];
+		gValueEcg.iWaves[ECGWAVE_I]=Demo_Ecg_I[DemoCountEcg];
+		gValueEcg.iWaves[ECGWAVE_II]=Demo_Ecg_II[DemoCountEcg];
+		gValueEcg.iWaves[ECGWAVE_III]=Demo_Ecg_III[DemoCountEcg];
+		
+
+		if(gCfgEcg.bLeadType==ECGTYPE_3LEAD){
+			for(i=0;i<7;i++) 
+				gValueEcg.iWaves[i]=BASELINE_ECG;
+			switch(gCfgEcg.bChannel1){
+				case 0:
+					gValueEcg.iWaves[ECGWAVE_I]=Demo_Ecg_I[DemoCountEcg];
+				break;
+				case 1:
+					gValueEcg.iWaves[ECGWAVE_II]=Demo_Ecg_II[DemoCountEcg];
+				break;
+				case 2:
+					gValueEcg.iWaves[ECGWAVE_III]=Demo_Ecg_III[DemoCountEcg];
+				break;
+				default:
+					gValueEcg.iWaves[ECGWAVE_I]=BASELINE_ECG;
+			}
+			
+		}else{
+			//aVR = -(I+II)/2
+			gValueEcg.iWaves[ECGWAVE_AVR] = (gValueEcg.iWaves[ECGWAVE_I] + gValueEcg.iWaves[ECGWAVE_II])/2;
+			//aVL=(I-III)/2
+			gValueEcg.iWaves[ECGWAVE_AVL] = (gValueEcg.iWaves[ECGWAVE_I] - gValueEcg.iWaves[ECGWAVE_III])/2 +BASELINE_ECG;
+			//aVF=(II+III)/2
+			gValueEcg.iWaves[ECGWAVE_AVF] = (gValueEcg.iWaves[ECGWAVE_II] + gValueEcg.iWaves[ECGWAVE_III])/2;	
 	
+			gValueEcg.iWaves[ECGWAVE_V]=Demo_Ecg_V[DemoCountEcg];
+		}
+
 	if(DemoCountEcg==0){
 		gbHaveBeep_QRS=TRUE;
 	}
 
+	gValueEcg.bLAOff=FALSE;
+	gValueEcg.bLLOff=FALSE;
+	gValueEcg.bRAOff=FALSE;
+	gValueEcg.bVOff=FALSE;
+	
 	DemoCountEcg+=1;
 	DemoCountEcg=DemoCountEcg%DEMO_ECG_COUNT;
 	
@@ -551,9 +587,8 @@ if(gbViewDemoData){
 			//wave V
 			waveV = data[7];	waveV += (data[8]<<7);	waveV &= 0xfff;
 			gValueEcg.iWaves[ECGWAVE_V]=waveV;
-}
 
-			if(gValueEcg.bLAOff || gValueEcg.bLLOff || gValueEcg.bRAOff || gCfgEcg.bLeadType==ECGTYPE_3LEAD){
+			if(gValueEcg.bLAOff || gValueEcg.bLLOff || gValueEcg.bRAOff ||gCfgEcg.bLeadType==ECGTYPE_3LEAD ){
 				gValueEcg.iWaves[ECGWAVE_AVR] = BASELINE_ECG;
 				gValueEcg.iWaves[ECGWAVE_AVL] = BASELINE_ECG;
 				gValueEcg.iWaves[ECGWAVE_AVF] = BASELINE_ECG;
@@ -565,10 +600,13 @@ if(gbViewDemoData){
 				gValueEcg.iWaves[ECGWAVE_AVL] = (gValueEcg.iWaves[ECGWAVE_I] - gValueEcg.iWaves[ECGWAVE_III])/2 +BASELINE_ECG;
 				//aVF=(II+III)/2
 				gValueEcg.iWaves[ECGWAVE_AVF] = (gValueEcg.iWaves[ECGWAVE_II] + gValueEcg.iWaves[ECGWAVE_III])/2;	
-
-				
+	
 			}
+
 			
+}
+
+			/*
 			if((gValueEcg.iWaves[0]>2047+500)||(gValueEcg.iWaves[0]<2047-500)){
 				
 					for(i=0;i<7;i++)
@@ -581,19 +619,8 @@ if(gbViewDemoData){
 					printf("LA off :%d,LL off :%d,RA off :%d\n ",gValueEcg.bLAOff,gValueEcg.bLLOff,gValueEcg.bRAOff);
 					
 				}
-/*			
-			
-					
+				*/
 
-			for(i=0;i<ECGWAVE_COUNT;i++){
-				gValueEcg.iWaves[i]=(gValueEcg.iWaves[i] -2047);
-			//	gValueEcg.iWaves[i]=(gValueEcg.iWaves[i] -2048)/6+128;
-				//printf(" %d \t",gValueEcg.iWaves[ECGWAVE_II] );
-			}
-
-		printf(" %d \n",gValueEcg.iWaves[ECGWAVE_II] );
-
-*/
 			//添加数据到实时存储数组中(原始1x数据)
 			FillOneRealSaveData();	
 			Save_net_ecg_wave();
@@ -671,6 +698,7 @@ if(gbViewDemoData){
 	
 	//		printf("ID_RESP_STA RR:%d\n",resp_rr);
 		}break;
+		
 		case ID_ST_TEMPLET :{
 			short st_val;
 			BYTE bHave_Temp;
@@ -701,7 +729,7 @@ if(gbViewDemoData){
 				}else
 					printf("st_count err %d\n",st_count);
 				
-			
+			/*
 				if(st_count==249){
 						for(i=0;i<250;i++){
 							if(i%10==0) printf("\n");
@@ -710,7 +738,7 @@ if(gbViewDemoData){
 						printf("count_test=%d\n",st_count);
 					}
 				
-				/*
+				
 				if(st_count==0){
 						memset(gST_templet, 0, sizeof gST_templet);
 						gST_templet[st_count]=st_val;
@@ -725,15 +753,19 @@ if(gbViewDemoData){
 			}
 		//	printf("%d\n",count_test);
 		}break;
-		case ID_ECG_HR :{
+/*************************************************************************
+*			心率参数
+*DATA[1]:HR Bit6~Bit0 
+*DATA[1]:
+*		Bit1~Bit0: HR Bit8~Bit7 
+*		
+*Note:HR Range :0~300, >300 Invalid 
+**************************************************************************/	
+case ID_ECG_HR :{
 			short HR;
 			HR = data[1]+((data[2]&0x03)<<7);
 
 			if(gbViewDemoData){
-				gValueEcg.bLAOff=FALSE;
-				gValueEcg.bLLOff=FALSE;
-				gValueEcg.bRAOff=FALSE;
-				gValueEcg.bVOff=FALSE;
 				
 				gValueEcg.wHR=80;
 			}else{
@@ -748,9 +780,15 @@ if(gbViewDemoData){
 			IsOff_V(&gValueEcg);	
 	
 			IsAlm_HR(&gValueEcg,&gCfgEcg,FALSE);
-		//	printf("HR=%d\n",HR);
+		//	printf("HR=%d\n",gValueEcg.wHR);
 			
 		}break;
+/*************************************************************************
+*			PVC返回值
+*DATA[1]:PVC Bit6~Bit0 
+*
+*Note:PVC Range :0~125, >125 Invalid
+**************************************************************************/				
 		case ID_ECG_PVC :{
 			if(data[1]<=125)
 				gValueEcg.bPVC = data[1];
@@ -758,6 +796,15 @@ if(gbViewDemoData){
 				gValueEcg.bPVC = 0;
 			
 		}break;
+/*************************************************************************
+*			ST返回值
+*DATA[1]:ST1 value Bit6~Bit0 
+*DATA[2]:
+*		Bit6~Bit4: 0= ST-I, 1=ST-II, 2=ST-III, 3=ST-V1
+*		Bit3~Bit0: ST1 value Bit10~Bit7
+*
+*Note:ST1 Range : 0~2000, >2000 Invalid 
+**************************************************************************/			
 		case ID_ST_VALUE1:{
 			short ST;
 			ST = data[1]+((data[2]&0x0f)<<7);
@@ -783,11 +830,26 @@ if(gbViewDemoData){
 			IsAlm_ST2(&gValueEcg,&gCfgEcg,FALSE);
 		//	printf("***ST=%d\n",ST);
 		}break;
+/*************************************************************************
+*			ST返回值
+*DATA[1]:ST2 value Bit6~Bit0 
+*DATA[2]:
+*		Bit6~Bit4: 0= ST-V2;    1=ST-V3;    2=ST-V4; 3=ST-V5;     4=ST-V6; 
+*		Bit3~Bit0: ST2 value Bit10~Bit7
+*
+*Note:ST1 Range : 0~2000, >2000 Invalid 
+**************************************************************************/			
 		case ID_ST_VALUE2 :{
 			
 			
 		}break;
-		case ID_ST_ISO_VAL:{
+/*************************************************************************
+*			ST、ISO返回值
+*DATA[1]:ST Point Value 
+*DATA[2]:ISO Point Value 
+*Note: Unit:    4mS 
+**************************************************************************/		
+case ID_ST_ISO_VAL:{
 			BYTE ST_val,ISO_val;
 			ST_val=data[1];
 			ISO_val=data[2];
@@ -798,6 +860,41 @@ if(gbViewDemoData){
 		//	printf("..........ST_val=%d,ISO_val=%d\n",gCfgEcg.bST,gCfgEcg.bISO);
 			
 		}break;
+/*************************************************************************
+*			ECG心律失常
+*DATA[1]:
+*		bit0:reserved_1
+*		bit1:reserved_2
+*		bit2:pacer non- capturing(起搏未捕获)
+*		bit3:pacer non- sensing (起搏未检测)
+*		bit4:irregular rhythm (心律不齐)
+*		bit5:atrial fibrillation(房颤)
+*		bit6:reserved_7
+*DATA[2]
+*		bit0:reserved_8
+*		bit1:reserved_9
+*		bit2:reserved_10
+*		bit3:supraventricular bradycardia 室上性心动过缓
+*		bit4:supraventricular tachycardia 室上性心动过速
+*		bit5:reserved_13
+*		bit6:Isolated PVC 早搏
+*DATA[3]
+*		bit0:trigeminy 三联律
+*		bit1:pause or dropped beat 漏搏
+*		bit2:accelerated ventricular rhythm  加速性室性自主心律
+*		bit3:bigeminy 二联律
+*		bit4:couplet	室性早搏成对
+*		bit5:ventricular bradycardia 实行心动过缓
+*		bit6:PVC within previous QT (R on T) 
+*DATA[4]
+*		bit0:ventricular tachycardia (short run)  室性心动过速
+*		bit1:ventricular tachycardia (long run) 室性心动过速
+*		bit2:ventricular fibrillation 室颤
+*		bit3:asystole 停搏
+*		bit4:ECG Artifact   心电干扰
+*		bit5:Not found R-Wave while ECG learning 未找到R波
+*		bit6:ECG Learning 心律学习
+**************************************************************************/		
 		case ID_ECG_ARR:{
 			unsigned long arr;
 			
@@ -808,7 +905,7 @@ if(gbViewDemoData){
 			gValueEcg.lARR=arr;
 			
 			IsAlm_Arr(&gValueEcg, &gCfgEcg, FALSE);
-			printf("*********ecg arr =%.6x\n",arr);
+		//	printf("*********ecg arr =%.6x\n",arr);
 			
 		}break;
 		
@@ -818,15 +915,15 @@ if(gbViewDemoData){
 		}break;
 
 /*************************************************************************
-*0x01: SPO2波形数据	
-*	data[1],SPO2波形：8位无符号数，数据范围：0～255。
-*	data[2],SPO2测量状态：
-*			bit6:脉搏标志，上位机在该标志为1时可以进行脉搏声音提示
-*			bit5: Photo Cell错误
-*			bit4:Red-LED错误
-*			bit3:IR-LED 
-*			bit2~0: 0-正常1-没有接探头2-没有接手指3-探头ID错4-信号弱
-*					5-没有波形6-运动干扰7-搜索脉搏
+*			0x01: SPO2波形数据	
+*DATA[1],SPO2波形：8位无符号数，数据范围：0～255。
+*DATA[2],SPO2测量状态：
+*		bit6:脉搏标志，上位机在该标志为1时可以进行脉搏声音提示
+*		bit5: Photo Cell错误
+*		bit4:Red-LED错误
+*		bit3:IR-LED 
+*		bit2~0: 0-正常1-没有接探头2-没有接手指3-探头ID错4-信号弱
+*				5-没有波形6-运动干扰7-搜索脉搏
 **************************************************************************/
 		case ID_SPO2_WAV:{
 			WORD wave;
@@ -902,21 +999,21 @@ if(gbViewDemoData){
 			
 		}break;
 /*************************************************************************
-*   0x02: SPO2数据
-*	data[1]:Spo2数据:0~100,
-*	data[2]:PR数值bit6~0
-*	data[3]:Bit6~Bit2: IR 调制百分比 
-*			Bit1~Bit0: PR数值bit8~7
+*  			 0x02: SPO2数据
+*DATA[1]:Spo2数据:0~100,
+*DATA[2]:PR数值bit6~0
+*DATA[3]:Bit6~Bit2: IR 调制百分比 
+*		Bit1~Bit0: PR数值bit8~7
 **************************************************************************/	
 		case ID_SPO2_DAT:{
 
 			BYTE Spo2Value;
 			WORD PR;
-			BYTE IR_ModulationPercent;
+			BYTE pi;
 			Spo2Value=data[1];
 			PR = data[2];
 			PR += (data[3]&0x03)<<7;
-			IR_ModulationPercent = (data[3]>>2);
+			pi = (data[3]>>2);
 			
 			if(gbViewDemoData){
 				
@@ -937,23 +1034,23 @@ if(gbViewDemoData){
 			IsAlm_SpO2(&gValueSpO2, &gCfgSpO2, FALSE);
 			IsAlm_PR(&gValueSpO2, &gCfgSpO2, FALSE);
 				
-		//	printf("Spo2Value=%d,PR=%d\n",Spo2Value,PR);
+	//		printf("Spo2Value=%d,PR=%d,pi=%d\n",Spo2Value,PR,pi);
 
 		}break;
 		
 /*************************************************************************
-* 0x03:体温数据
-*	data[1]:temp1温度数据Bit6~Bit0
-*	data[2]:temp2温度数据Bit6~Bit0
-*	data[3]:Bit3~Bit2:    Temp2  Bit8~Bit7
-*			Bit1~Bit2:    Temp1  Bit8~Bit7
-*	data[4]:Bit6=1: 体温系统错误 
-*			Bit5=1: Low-End Current Calibration Error 
-*			Bit4=1: High-End Current Calibration Error   
-*			Bit3=1: 体温2传感器类型错误
-*			Bit2=1: 体温1传感器类型错误
-*			Bit1=1: 体温探头2脱落
-*			Bit0=1: 体温探头1脱落
+* 			0x03:体温数据
+*DATA[1]:temp1温度数据Bit6~Bit0
+*DATA[2]:temp2温度数据Bit6~Bit0
+*DATA[3]:Bit3~Bit2:    Temp2  Bit8~Bit7
+*		Bit1~Bit2:    Temp1  Bit8~Bit7
+*DATA[4]:Bit6=1: 体温系统错误 
+*		Bit5=1: Low-End Current Calibration Error 
+*		Bit4=1: High-End Current Calibration Error   
+*		Bit3=1: 体温2传感器类型错误
+*		Bit2=1: 体温1传感器类型错误
+*		Bit1=1: 体温探头2脱落
+*		Bit0=1: 体温探头1脱落
 **************************************************************************/
 		case ID_TEMP_DAT:{
 			WORD Temp1Val,Temp2Val;
@@ -1001,20 +1098,21 @@ if(gbViewDemoData){
 			IsAlm_T2(&gValueTemp,&gCfgTemp,FALSE);
 			if(Temp1Val<500&&Temp2Val<500)
 				IsAlm_TD(&gValueTemp,&gCfgTemp,FALSE);				
-		//	printf("Temp1Val=%d,Temp2Val=%d\n",Temp1Val,Temp2Val);
+		//	printf("Temp1Val=%d,Temp2Val=%d,data[4]%.2x,\n",Temp1Val,Temp2Val,data[4]);
 			
 		}break;
 		
 /********************************************************
-*DAT[1]: SYS	BIT6-BIT0
-*DAT[2]: MEA	BIT6-BIT0
-*DAT[3]: DIA	BIT6-BIT0  
-*DAT[4]: PULSE RATE BIT6-BIT0
-*DAT[5]: NOT: UES BIT6
+*		无创血压参数
+*DATA[1]: SYS	BIT6-BIT0
+*DATA[2]: MEA	BIT6-BIT0
+*DATA[3]: DIA	BIT6-BIT0  
+*DATA[4]: PULSE RATE BIT6-BIT0
+*DATA[5]: NOT: UES BIT6
 *		SYS:  BIT5-BIT4		(SYS BIT8-BIT7)
 *		MEA:  BIT3-BIT2		(MEA BIT8-BIT7)
 *		DIA :  BIT1-BIT0		(DIA BIT8-BIT7)
-*DAT[6]: NOT USE:  BIT6-BIT2
+*DATA[6]: NOT USE:  BIT6-BIT2
 *		NIBP-PR:  BIT1-BIT0	(PR  BIT8-BIT7)
 *NOTE  :NIBP SYS[0-300]  INVALID >300   UNIT  MMHG
 *		NIBP MEA [0~300]    Invalid>300
@@ -1024,7 +1122,7 @@ if(gbViewDemoData){
 		case ID_NIBP_DAT:{
 			WORD NibpSys,NibpDia,NibpMean,NibpPR;
 			NibpSys= data[1];
-			NibpSys+=((data[5]&0x30)<<2);
+			NibpSys+=((data[5]&0x30)<<3);
 			NibpMean=data[2];
 			NibpMean+=((data[5]&0x0c)<<5);
 			NibpDia=data[3];
@@ -1037,6 +1135,8 @@ if(gbViewDemoData){
 			gValueNibp.wMean=NibpMean;
 			gValueNibp.wDia=NibpDia;
 			gValueNibp.wPR=NibpPR;
+			//存储一条NIBP趋势
+			RecOneTrendRecord(TRENDNIBP);
 			
 		}
 
@@ -1045,8 +1145,9 @@ if(gbViewDemoData){
 		printf("ID_NIBP_DAT: %d / %d (%d),NibpPR:%d\n",NibpSys,NibpDia,NibpMean,NibpPR);	
 		}break;
 /********************************************************
-*DAT1  NIBP Cuff Pressure Bit6~Bit0
-*DAT2  		Bit6:    	1=NIBP system Running 
+*			无创血压袖带压力实时状态
+*DATA1  NIBP Cuff Pressure Bit6~Bit0
+*DATA2  		Bit6:    	1=NIBP system Running 
 *           		   		0=NIBP system Idle 
 *			Bit5:    	1 = Adult Cuff Type 
 *           				0 = Pediatric/Neonate Cuff Type
@@ -1117,8 +1218,9 @@ if(gbViewDemoData){
 			}break;
 
 /********************************************************
-*DAT1: 		Bit6~Bit0  NIBP Calibration Pressure Value Bit6~Bit0 
-*DAT2: 		Bit1~Bit0  NIBP Calibration Pressure Value Bit8~Bit7 
+*			无创血压校准返回压力值
+*DATA1: 		Bit6~Bit0  NIBP Calibration Pressure Value Bit6~Bit0 
+*DATA2: 		Bit1~Bit0  NIBP Calibration Pressure Value Bit8~Bit7 
 *
 *Note: 		Request  external  calibration  pressure  valu
 *			Host  must  respond  this  command  
@@ -1138,7 +1240,8 @@ if(gbViewDemoData){
 			}break;
 		
 /********************************************************
-*DATA0: Bit6~Bit0  NIBP Feedback state to Host 
+*			无创血压返回值
+*DATA1: Bit6~Bit0  NIBP Feedback state to Host 
 *		0x01: manual measurement Start OK 
 *		0x02: manual measurement Start Abort 
 *		0x03: auto measurement Start OK 
@@ -1196,7 +1299,7 @@ if(gbViewDemoData){
 					
 				}
 				
-				//isErr_iBioNibp(&gValueNibp);
+			//	isErr_iBioNibp(&gValueNibp);
 				printf("\nID_NIBP_FDB : ***0x%02x***\n",StatetoHost);
 			}
 
@@ -1218,9 +1321,23 @@ if(gbViewDemoData){
 		case ID_IBP_TIM:{
 
 		}break;
-		/*
-		参数板软 硬件版本号
-		*/
+/******************************************************
+*		参数板软 硬件版本号
+*DATE1:模块硬件主版本号Bit6~Bit0 
+*DATE2:模块硬件次版本号Bit6~Bit0 
+*DATE3:模块软件主版本号Bit6~Bit0 
+*DATE4:模块软件次版本号Bit6~Bit0 
+*DATE5:模块UID Bit6~Bit0 
+*DATE6:模块UID Bit13~Bit7
+*DATE7:模块UID Bit20~Bit14 
+*DATE8:模块UID Bit27~Bit21 
+*DATE9:Bit3~Bit0 :
+*				模块UID Bit6~Bit0 
+*		 Bit7~Bit4:
+*		 		1:    MPA-Unit Info (主控制单元信息)
+*				2:    STP-Unit Info (spo2,temp,nibp控制单元信息)
+*				3:    ER-Unit Info (ecg,resp控制单元信息)
+************************************************************/
 		case ID_UNIT_INFOS:{
 			unsigned int hard_version;
 			unsigned int soft_version;
@@ -1317,13 +1434,15 @@ static int UnChecksum(unsigned char * pack, int len)
 	if ( checksum != (*(pack+len-1)) ){
 	//if ( (checksum & 0x7f) != (*(pack+len-1)) )
 	/*
-		printf("**************check err[%2x]\n",checksum);
-		for(i=0;i<len;i++){
-			printf("%.2x ",pack[i]);
+		if(*pack==0x87){
+			printf("**************check err[%2x]\n",checksum);
+			for(i=0;i<len;i++){
+				printf("%.2x ",pack[i]);
+			}
+			printf("\n ");
 		}
-		printf("\n ");
-*/
-		
+		*/
+	
 		return -2;	//Check Sum Error
 	}
 	return 0;	//OK
@@ -1384,6 +1503,7 @@ int newiBio_UnBind (unsigned char *data, int length)
 		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	};
 	int result=0;
+	int i;
 	BYTE st_count=0;
 	/* 读取缓冲区的数据*/
 	while (length > 0)
@@ -1397,11 +1517,16 @@ int newiBio_UnBind (unsigned char *data, int length)
 				/* 接收到整个包的数据，则开始解包*/
 				if (sCurrPacketLen == sPkgSize [sCurrPacket[0]&0x7f]) {
 					
+					
+					
 					result = UnChecksum(sCurrPacket, sCurrPacketLen );
 					
 					if ( 0 == result ){
 						/* TODO：用户可以处理解包后的数据*/
 						newiBio_Analyze(sCurrPacket, sCurrPacketLen);
+					}else{
+					
+
 					}
 					sPacketIdFound = 0;
 				}
@@ -1417,7 +1542,7 @@ int newiBio_UnBind (unsigned char *data, int length)
 				sCurrPacketLen = 1;
 				sCurrPacket[0] = *data;
 				sPacketIdFound = 1;
-			
+				
 			}else {
 				/* 当前数据不是正确的包类型*/
 				result = -1;
@@ -1911,6 +2036,65 @@ int Set_Spo2_Sen()
 /*
 	接收线程
 */
+/*
+void  *ptProc_newiBioRecv(void *arg)
+{
+	int iLen; 
+	int i,j,k;
+	unsigned char bBuff[RECVBUFF_MAX_IBIO];	
+	static unsigned char save_buff[1000];
+	static int save_count,buff_c;
+	unsigned char buff[50];
+	if(B_PRINTF) printf("(%s:%d)create read thread for %s .\n", __FILE__, __LINE__, gSerialsName[gSerialIndex_newiBio]);
+	
+	for(;;){
+
+		iLen = iBio_Recv(bBuff, RECVBUFF_MAX_IBIO, 115200);
+		
+		if(iLen>0){
+			
+			for(i=0;i<iLen;i++){
+				save_buff[save_count]=bBuff[i];
+				
+				if(save_buff[save_count]>0x80){
+			
+					if(buff[0]>0x80){
+						if(buff[0]==0x81){
+							if(j!=10){
+							for(k=0;k<j;k++)
+								printf("%.02x ",buff[k]);
+							printf("\n");
+							}
+					}
+						newiBio_UnBind(buff,j);
+					}
+					j=0;
+					memset(buff, 0, sizeof buff);
+					
+				}
+					buff[j]=save_buff[save_count];
+					j=(j+1)%50;
+				save_count=(save_count+1)%1000;	
+			}
+				
+
+			
+				
+ 		//	newiBio_UnBind(bBuff,iLen);
+			
+		}
+		else{
+			
+			if(B_PRINTF) printf("(%s:%d) %s ID:%d receive error.\n\n", __FILE__, __LINE__, gSerialsName[gSerialIndex_newiBio], gSerialIndex_newiBio);
+			
+		}
+	}
+	
+	if(B_PRINTF) printf("\nBye from %d thread.\n", gfdSerial_newiBio);
+	pthread_exit("Bye");
+}
+*/
+
 void  *ptProc_newiBioRecv(void *arg)
 {
 	int iLen; 

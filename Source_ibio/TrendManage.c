@@ -22,11 +22,13 @@ extern HWND ghWndMain;
 
 //趋势自动存储的周期，单位：秒
 #define AUTOSAVETREND_CYCLE	60	
-// #define AUTOSAVETREND_CYCLE	1
+ #define SAVETRENDTOFILE_TIME	600   //10*60 s 10分钟
+
 
 //趋势数组
 CA_TRENDARRAY gTrendDatas;
 CA_SHORTTREND gShortTrendDatas;
+CA_NIBPTREND gNIBPTrend;
 
 //趋势文件是否已经建立,如果没有建立,需要初始化趋势数据
 BOOL gbTrendFileExist = FALSE;
@@ -211,7 +213,8 @@ int  AddNullRecord(BYTE bLogFlag)
 static int TrendArray_Add(const PTRENDDATA pData)
 {
 	WORD wHead, wTail, wSize, wCount;
-	BOOL bLoop;
+	BOOL bLoop,bReplace=FALSE;
+	long liTimeOffset;
 	
 	if(pData == NULL) return -1;
 	
@@ -219,11 +222,9 @@ static int TrendArray_Add(const PTRENDDATA pData)
 	wTail = gTrendDatas.wTailIndex;
 	bLoop = gTrendDatas.bLoop;
 	wSize = MAXTRENDCOUNT;
-	
 
 	if(wHead < (wSize-1)){
 		wHead ++;
-
 		if(bLoop){
 			//如果是翻转的情况
 			if(wTail < (wSize-1)){
@@ -242,9 +243,18 @@ static int TrendArray_Add(const PTRENDDATA pData)
 		bLoop = TRUE;
 	}
 	
+//nibp测量插入趋势数据处理	
+if(pData->bLogFlag==TRENDNIBP){
+//计算此次记录的时间与起始时间的偏移量, 精确到秒
+		wHead = gTrendDatas.wHeadIndex;
+		wTail = gTrendDatas.wTailIndex;
+		bLoop = gTrendDatas.bLoop;
+		bReplace=TRUE;
+}
 	gTrendDatas.wHeadIndex = wHead;
 	gTrendDatas.wTailIndex = wTail;
 	gTrendDatas.bLoop = bLoop;
+	
 	gTrendDatas.Datas[gTrendDatas.wHeadIndex] = *pData;
 	//计算实际存储的数量
 	if(gTrendDatas.wHeadIndex < gTrendDatas.wTailIndex){
@@ -252,7 +262,9 @@ static int TrendArray_Add(const PTRENDDATA pData)
 		gTrendDatas.wCount = MAXTRENDCOUNT;
 	}
 	else{
-		gTrendDatas.wCount +=1;
+		if(!bReplace){
+			gTrendDatas.wCount +=1;
+		}
 	}
 
 	return wHead;
@@ -494,15 +506,15 @@ static void *ThreadProcSaveTrend(void *arg)
 	int temp;
 		
 	for(;;){
- 		if(iCountTime>2*60){
+ 		if(iCountTime>SAVETRENDTOFILE_TIME){
 			//把当前趋势存储在Flash
   			SaveTrendToFlash(&gTrendDatas);
 			iCountTime=1;
 		}
 		else{
 			//把趋势存储在内存
-			if(iCount >=AUTOSAVETREND_CYCLE){
-			//if(iCount >=2){
+		//	if(iCount >=AUTOSAVETREND_CYCLE){
+			if(iCount >=10){
 				//加锁
 				pthread_mutex_lock(&mtSaveTrend);
 				RecOneTrendRecord(TRENDAUTO);
@@ -515,9 +527,8 @@ static void *ThreadProcSaveTrend(void *arg)
 		timeout.tv_sec = 1;
 		timeout.tv_usec= 0;
 		delay = select(FD_SETSIZE, NULL, NULL, NULL, &timeout);
-		iCount +=1;
-		iCountTime+=1;
-		
+		iCount =(iCount +1)%100;
+		iCountTime =(iCountTime +1)%1000;		
 	}
 }
 
@@ -713,10 +724,11 @@ int  RecOneTrendRecord(BYTE bLogFlag)
 			}
 		}
  	}
-
+	
 	//添加到趋势数组
 	TrendArray_Add(&tmpTrend);
 	 ShortTrendArray_Add(&tmpTrend);	
+	 
 //  	printf("%s : %d Trend data start time is %.4d/%.2d/%.2d %.2d:%.2d:%.2d\n", __FILE__, __LINE__, 
 //  		 gTrendDatas.sStartTime.wYear, gTrendDatas.sStartTime.bMonth, gTrendDatas.sStartTime.bDay, 
 //  		 gTrendDatas.sStartTime.bHour, gTrendDatas.sStartTime.bMin, gTrendDatas.sStartTime.bSec);

@@ -2342,6 +2342,7 @@ int iBio_Analyze(unsigned char*data,int len)
 				
 				//´æ´¢Ò»ÌõNIBPÇ÷ÊÆ, ²âÊÔ
 				RecOneTrendRecord(TRENDNIBP);
+				
 				gValueNibp.bMeasureOK=FALSE;
 			}
 			if(B_PRINTF) printf("ID_NBP_RESULT2 0x23,gValueNibp.wPR=%d\n",gValueNibp.wPR);

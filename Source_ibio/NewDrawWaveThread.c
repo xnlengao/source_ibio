@@ -18,8 +18,6 @@
 static BOOL gbDebugRect = FALSE;
 
 
-
-
 //波形区域的背景颜色
 #define	WAVE_BKCOLOR	COLOR_black	
 

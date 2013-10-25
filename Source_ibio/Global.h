@@ -248,15 +248,7 @@ BOOL gbViewDemoData;
 #define DEMOCOUNT_PM9K	500		//50Hz    
 #define DEMOCOUNT_IBP2		500		//50Hz
 #define DEMOCOUNT_CO2		1000	//100Hz
-FILE            *gfileDemo_PM9K;		//文件标志
-struct stat gDemoStat_PM9K;		//文件状态
-BOOL gbSaveDemo_PM9K;			//是否保存DEMO文件
-FILE            *gfileDemo_IBP;
-struct stat gDemoStat_IBP;
-BOOL gbSaveDemo_IBP;
-FILE            *gfileDemo_CO2;
-struct stat gDemoStat_CO2;
-BOOL gbSaveDemo_CO2;
+
 
 //波形冻结回放的控制变量
 //显示波形的数量
@@ -292,8 +284,6 @@ S_NET_CFG		gCfgNet;
 //是否进行心电分析
 BOOL gbEcgAnalysis;
 
-//是否为PM41主板 
-BOOL gbPMVer41;
 
 //Sensor
 BOOL gbSensor_Temp;		//0-503Et, 1-YSI-400

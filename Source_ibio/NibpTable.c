@@ -105,7 +105,7 @@ typedef struct {
 }TABLE_ITEM, *PTABLE_ITEM;
 
 //趋势表最大可绘制的行数(Label, Datas),不包括Status
-#define ROW_MAXCOUNT	10
+#define ROW_MAXCOUNT	11
 //趋势表最大可绘制的列数(Mark, Time, Paras)
 #define COL_MAXCOUNT		13	
 //趋势表列内容的结构
@@ -925,7 +925,7 @@ static int UpdateTableDatas(HWND hWnd)
 		SetBrushColor(hdc, COLOR_TABLEBK);
 		
 		for(i=0; i<(gTableContent.iColCount); i++){
-			for(j=1; j<ROW_MAXCOUNT; j++){
+			for(j=0; j<ROW_MAXCOUNT; j++){
 				//清除文字
 				FillBox(hdc,
 					gTableContent.Datas[i].ColDatas[j].rect.left+1, 
@@ -967,15 +967,21 @@ static int UpdateTableStatus(HWND hWnd)
 	if(hdc == (HDC)NULL) return -1;
 		
 	//根据趋势数量和一页显示的数量计算页数
-	if((giTrendDataCount % ROW_MAXCOUNT)>0){
+	if((giTrendDataCount % (ROW_MAXCOUNT-1))>0){
 		iPageCount = giTrendDataCount / (ROW_MAXCOUNT-1) +1;
+		//计算当前页数
+		iCurPage = iPageCount -  gCurrentIndex / (ROW_MAXCOUNT -1);
+		printf("11111111111111111111\n");
 	}
 	else{
 		iPageCount = giTrendDataCount / (ROW_MAXCOUNT-1);
+				//计算当前页数
+		iCurPage = iPageCount -  gCurrentIndex / (ROW_MAXCOUNT -1)+1;
+
+		printf("222222222222222222222222\n");
 	}
 				
-	//计算当前页数
-	iCurPage = iPageCount -  gCurrentIndex / (ROW_MAXCOUNT -1);
+	
 
 	memset(strStatus, 0, sizeof strStatus);
 	snprintf(strStatus, sizeof strStatus, "%d / %d ", iCurPage, iPageCount);

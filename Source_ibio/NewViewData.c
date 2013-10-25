@@ -539,7 +539,7 @@ static int InitRectEcg()
 		//ARR
 		SetRect(&gRCEcg_Arr, gRCEcg.left+170-giLeftDec,gRCEcg.top+69,gRCEcg.left + 241-giLeftDec,gRCEcg.top+85);
 		//ECG Info (ARR)
-		SetRect(&gRCEcg_Info, gRCEcg.left+1,gRCEcg.bottom-16,gRCEcg.left+RECTW(gRCEcg)/2,gRCEcg.bottom-1);
+		SetRect(&gRCEcg_Info, gRCEcg.left+1,gRCEcg.bottom-30,gRCEcg.left+RECTW(gRCEcg)/2,gRCEcg.bottom-1);
 		//ECG ST
 		SetRect(&gRCEcg_St, gRCEcg.right-RECTW(gRCEcg)/2,gRCEcg.bottom-16,gRCEcg.right,gRCEcg.bottom-1);
 	
@@ -583,16 +583,29 @@ unsigned char *strArrType[] = {
 static int ViewECG_ARR_info(HDC hdc)
 {
 	int i;
+	static int arr_count;
 	unsigned char str_arr_info[200]={0};
 	if(gCfgEcg.bArrAnalyse==0) return 0;
 	
 	for(i=0;i<28;i++){
 		if(gValueEcg.lARR&(0x01<<i)){
 			GetStringFromResFiles(gsLanguageRes, STR_SETTING_DLG_ECGARR, strArrType[i], str_arr_info, sizeof str_arr_info,strArrType[i]);
-		}
-	}
-	DrawText(hdc, str_arr_info, -1, &gRCEcg_Info, DT_NOCLIP | DT_VCENTER | DT_LEFT | DT_SINGLELINE);	
+			switch(arr_count){
+				case 0:
+					DrawText(hdc, str_arr_info, -1, &gRCEcg_Info, DT_NOCLIP | DT_BOTTOM | DT_LEFT | DT_SINGLELINE);	
+				break;
+				case 1:
+					DrawText(hdc, str_arr_info, -1, &gRCEcg_Info, DT_NOCLIP | DT_TOP | DT_LEFT | DT_SINGLELINE);	
+				break;	
+				default:break;
+					
+			}
 
+			arr_count++;
+		}
+		
+	}
+	arr_count=0;
 	return 0;
 
 }
@@ -812,7 +825,7 @@ static int ViewEcg(HDC hdc, BYTE bInterface, BYTE bMemCopy)
 //PVCs
 	//	Rectangle(hdc, gRCEcg_PVCs.left, gRCEcg_PVCs.top, gRCEcg_PVCs.right, gRCEcg_PVCs.bottom);
 //ARR
-	//	Rectangle(hdc, gRCEcg_Arr.left, gRCEcg_Arr.top, gRCEcg_Arr.right, gRCEcg_Arr.bottom);
+//		Rectangle(hdc, gRCEcg_Arr.left, gRCEcg_Arr.top, gRCEcg_Arr.right, gRCEcg_Arr.bottom);
 //ECG Info (ARR)
 		Rectangle(hdc, gRCEcg_Info.left, gRCEcg_Info.top, gRCEcg_Info.right, gRCEcg_Info.bottom);
 //ECG ST
@@ -868,12 +881,9 @@ if(gCfgSystem.bInterface!=SCREEN_BIGCHAR){
 	SetRect(&gRCNibp_Object, gRCNibp.left+100,  gRCNibp.top+1, gRCNibp.left+140, gRCNibp.top+17);
 	//Alarm Icon
 	SetRect(&gRCNibp_AlmIcon, gRCNibp.right-20,  gRCNibp.top+1, gRCNibp.right, gRCNibp.top+20);
-	//NIBP Data -- Sys
-	SetRect(&gRCNibp_Sys, gRCNibp.left+35-giLeftDec,  gRCNibp.top+23, gRCNibp.left+122-giLeftDec, gRCNibp.bottom-17);
+
 	//Limit Sys
 	SetRect(&gRCNibp_limit_Sys, gRCNibp.left+1,  gRCNibp.top+30, gRCNibp.left+30, gRCNibp.top+55);
-	//NIBP Data -- Dia
-	SetRect(&gRCNibp_Dia, gRCNibp.left+160-giLeftDec,  gRCNibp.top+23, gRCNibp.left+247-giLeftDec,gRCNibp.bottom-17);
 	//Limit Dia
 	SetRect(&gRCNibp_limit_Dia, gRCNibp.right-30,  gRCNibp.top+30, gRCNibp.right-1, gRCNibp.top+55);
 	
@@ -889,6 +899,11 @@ if(gCfgSystem.bInterface!=SCREEN_BIGCHAR){
 		//测量信息,包括报警
 	// 	SetRect(&gRCNibp_Info, gRCNibp.left+77-giLeftDec,  gRCNibp.top+76, gRCNibp.left+195-giLeftDec, gRCNibp.top+91);
 		SetRect(&gRCNibp_Info, gRCNibp.right-200,  gRCNibp.bottom-17, gRCNibp.right, gRCNibp.bottom);
+
+		//NIBP Data -- Sys
+		SetRect(&gRCNibp_Sys, gRCNibp.left+30,  gRCNibp.top, gRCNibp.left+180, gRCNibp.bottom-30);
+		//NIBP Data -- Dia
+		SetRect(&gRCNibp_Dia, gRCNibp.right-180,  gRCNibp.top, gRCNibp.right-30,gRCNibp.bottom-30);
 
 		//NIBP --/--
 		SetRect(&gRCNibp_Inter, gRCNibp.left+30,  gRCNibp.top, gRCNibp.right-30, gRCNibp.bottom-30);
@@ -913,10 +928,15 @@ if(gCfgSystem.bInterface!=SCREEN_BIGCHAR){
 	// 	SetRect(&gRCNibp_Info, gRCNibp.left+77-giLeftDec,  gRCNibp.top+76, gRCNibp.left+195-giLeftDec, gRCNibp.top+91);
 		SetRect(&gRCNibp_Info, gRCNibp.left+40,  gRCNibp.bottom-17, gRCNibp.left+150, gRCNibp.bottom);
 
+		//NIBP Data -- Sys
+		SetRect(&gRCNibp_Sys, gRCNibp.left+30,  gRCNibp.top+17, gRCNibp.left+90, gRCNibp.bottom-28);
+		//NIBP Data -- Dia
+		SetRect(&gRCNibp_Dia, gRCNibp.right-90,  gRCNibp.top+17, gRCNibp.right-30,gRCNibp.bottom-28);
+
 		//NIBP --/--
-		SetRect(&gRCNibp_Inter, gRCNibp.left+30,  gRCNibp.top+17, gRCNibp.right-30, gRCNibp.bottom-25);
+		SetRect(&gRCNibp_Inter, gRCNibp.left+30,  gRCNibp.top+17, gRCNibp.right-30, gRCNibp.bottom-28);
 		//NIBP Data -- Mean
- 		SetRect(&gRCNibp_Mean, gRCNibp.left+140,  gRCNibp.bottom-35, gRCNibp.right-1, gRCNibp.bottom);
+ 		SetRect(&gRCNibp_Mean, gRCNibp.left+135,  gRCNibp.bottom-35, gRCNibp.right-1, gRCNibp.bottom);
 
 		//Label sys-dia
 		SetRect(&gRCNibp_label_SysDia, gRCNibp_Inter.left , gRCNibp_Inter.top-3, gRCNibp_Inter.right, gRCNibp_Inter.top+15);
@@ -934,8 +954,13 @@ if(gCfgSystem.bInterface!=SCREEN_BIGCHAR){
 	// 	SetRect(&gRCNibp_Info, gRCNibp.left+77-giLeftDec,  gRCNibp.top+76, gRCNibp.left+195-giLeftDec, gRCNibp.top+91);
 		SetRect(&gRCNibp_Info, gRCNibp.right-200,  gRCNibp.bottom-17, gRCNibp.right, gRCNibp.bottom);
 
+		//NIBP Data -- Sys
+		SetRect(&gRCNibp_Sys, gRCNibp.left+30,  gRCNibp.top, gRCNibp.left+230, gRCNibp.bottom-48);
+		//NIBP Data -- Dia
+		SetRect(&gRCNibp_Dia, gRCNibp.right-230,  gRCNibp.top, gRCNibp.right-30,gRCNibp.bottom-48);
+
 		//NIBP --/--
-		SetRect(&gRCNibp_Inter, gRCNibp.left+30,  gRCNibp.top, gRCNibp.right-30, gRCNibp.bottom-48);
+		SetRect(&gRCNibp_Inter, gRCNibp.left+230,  gRCNibp.top, gRCNibp.right-230, gRCNibp.bottom-42);
 		//NIBP Data -- Mean
  		SetRect(&gRCNibp_Mean, gRCNibp.left+130,  gRCNibp.top+100, gRCNibp.right-130, gRCNibp.bottom);
 		//Label sys-dia
@@ -951,8 +976,13 @@ if(gCfgSystem.bInterface!=SCREEN_BIGCHAR){
 	// 	SetRect(&gRCNibp_Info, gRCNibp.left+77-giLeftDec,  gRCNibp.top+76, gRCNibp.left+195-giLeftDec, gRCNibp.top+91);
 		SetRect(&gRCNibp_Info, gRCNibp.left+40,  gRCNibp.bottom-17, gRCNibp.left+150, gRCNibp.bottom);
 
+		//NIBP Data -- Sys
+		SetRect(&gRCNibp_Sys, gRCNibp.left+30,  gRCNibp.top+17, gRCNibp.left+110, gRCNibp.bottom-40);
+		//NIBP Data -- Dia
+		SetRect(&gRCNibp_Dia, gRCNibp.right-110,  gRCNibp.top+17, gRCNibp.right-30,gRCNibp.bottom-40);
+
 		//NIBP --/--
-		SetRect(&gRCNibp_Inter, gRCNibp.left+30,  gRCNibp.top+17, gRCNibp.right-30, gRCNibp.bottom-40);
+		SetRect(&gRCNibp_Inter, gRCNibp.left+110,  gRCNibp.top+17, gRCNibp.right-110, gRCNibp.bottom-40);
 		//NIBP Data -- Mean
  		SetRect(&gRCNibp_Mean, gRCNibp.left+140,  gRCNibp.bottom-40, gRCNibp.right-1, gRCNibp.bottom);
 
@@ -1051,6 +1081,24 @@ static int ViewNibp_Info(HDC hdc)
 		case NBP_FDB_SIS_PRO_OT:
 			GetStringFromResFiles(gsLanguageRes, "TEC_INFO", "nibp_fdb_sis_pro_ot", strInfo, sizeof strInfo,"Process Overtime");
 		break;
+		case NBP_FDB_FAIL_01:
+		case NBP_FDB_FAIL_02:
+		case NBP_FDB_FAIL_03:
+		case NBP_FDB_FAIL_04:
+		case NBP_FDB_FAIL_05:
+		case NBP_FDB_FAIL_06:
+		case NBP_FDB_FAIL_07:
+		case NBP_FDB_FAIL_08:
+		case NBP_FDB_FAIL_09:
+		case NBP_FDB_FAIL_10:	
+		case NBP_FDB_FAIL_11:
+		case NBP_FDB_FAIL_12:
+		case NBP_FDB_FAIL_13:
+		case NBP_FDB_FAIL_14:
+		case NBP_FDB_FAIL_15:
+		case NBP_FDB_FAIL_16:
+			GetStringFromResFiles(gsLanguageRes, "TEC_INFO", "nibp_fdb_fail", strInfo, sizeof strInfo,"NIBP fail");
+		break;	
 		default:
 			strcpy(strInfo,"");
 		break;
@@ -1061,6 +1109,8 @@ static int ViewNibp_Info(HDC hdc)
 	//nibp测量错误信息
 	if(((!gValueNibp.bCanceled)  || (gbNibpProtect) )&&gValueNibp.bStatus==NIBP_SYSTEM_IDLE){
 		snprintf(strErrCode, sizeof strErrCode, "%d", gValueNibp.wErrCode);
+		if(gValueNibp.wFDB>=NBP_FDB_FAIL_01&&gValueNibp.wFDB<=NBP_FDB_FAIL_16)
+					sprintf(strInfo,"%s:%x",strInfo,gValueNibp.wFDB);
 		
 		if(gCfgSystem.bInterface==SCREEN_BIGCHAR)
 			DrawText(hdc, strInfo, -1, &gRCNibp_Info, DT_NOCLIP | DT_VCENTER | DT_RIGHT | DT_SINGLELINE);	
@@ -1206,7 +1256,7 @@ static int ViewNibp(HDC hdc, BYTE bInterface, BOOL bMemCopy)
 	double fSys, fDia, fMean;
 	unsigned char strSys[5]={0}, strDia[5]={0},strMean[8]={0}, strPress[5]={0};
 	
-	unsigned char strSysDia[15]={0};
+	
 	static BOOL bFlashData = FALSE;
 
 	unsigned char strTime[10]={0};
@@ -1239,11 +1289,13 @@ static int ViewNibp(HDC hdc, BYTE bInterface, BOOL bMemCopy)
 	if(iSys !=0 && iDia !=0 && iMean !=0){
 		switch(gCfgNibp.bUnit){
 			case 0:{//mmHg
-				snprintf(strSysDia, sizeof strSysDia, "%d / %d",iSys, iDia);
+				snprintf(strSys, sizeof strSys, "%d",iSys);
+				snprintf(strDia, sizeof strDia, "%d",iDia);
 				snprintf(strMean, sizeof strMean, "(%d)", iMean);
 			}break;
 			case 1:{//kPa
-				snprintf(strSysDia, sizeof strSysDia, "%.1f / %.1f",fSys, fDia);
+				snprintf(strSys, sizeof strSys, "%.1f",fSys);
+				snprintf(strDia, sizeof strDia, "%.1f",fDia);
 				snprintf(strMean, sizeof strMean, "(%.1f)", fMean);
 			}break;
 		}
@@ -1251,11 +1303,13 @@ static int ViewNibp(HDC hdc, BYTE bInterface, BOOL bMemCopy)
 	else{
 		switch(gCfgNibp.bUnit){
 			case 0:{//mmHg
-				snprintf(strSysDia, sizeof strSysDia, "---/---");
+				snprintf(strSys, sizeof strSys, "---");
+				snprintf(strDia, sizeof strDia, "---");
 				snprintf(strMean, sizeof strMean, "(---)");
 			}break;
 			case 1:{//kPa
-				snprintf(strSysDia, sizeof strSysDia, "--.-/--.-");
+				snprintf(strSys, sizeof strSys, "--.-");
+				snprintf(strDia, sizeof strDia, "--.-");
 				snprintf(strMean, sizeof strMean, "(--.-)");
 			}break;
 		}
@@ -1338,32 +1392,17 @@ static int ViewNibp(HDC hdc, BYTE bInterface, BOOL bMemCopy)
 	  	DrawText(hdc, "Mean", -1, &gRCNibp_label_Mean, DT_NOCLIP | DT_TOP | DT_CENTER | DT_SINGLELINE);
 	
 	}
-	
-
 	//显示分割符号
-
-	//显示 Sys/Dia
-	if(gbAlarmNibp_Sys && (gCfgNibp.bAlmControl != ALARM_OFF)){
-		if(bFlashSys){
-			SetTextColor(hdc, ALARMFLASH_COLOR);
-		}
-		else{
-			SetTextColor(hdc, gCfgNibp.iColor);		
-		}
-		bFlashSys = !bFlashSys;
-	}
-	else{
-		SetTextColor(hdc, gCfgNibp.iColor);			
-	}
+	
 #if SCREEN_640
 	if(gCfgSystem.bInterface==SCREEN_BIGCHAR){
 		if(gCfgNibp.bUnit == NIBP_UNIT_MMHG)
 			SelectFont(hdc, gFontTTF_75);
 		else
-			SelectFont(hdc, gFontTTF_60);
+			SelectFont(hdc, gFontTTF_70);
 		
 	}else{
-			SelectFont(hdc, gFontTTF_35Bk);
+			SelectFont(hdc, gFontTTF_30Bk);
 	}
 #else
 	if(gCfgSystem.bInterface==SCREEN_BIGCHAR){
@@ -1376,7 +1415,43 @@ static int ViewNibp(HDC hdc, BYTE bInterface, BOOL bMemCopy)
 			SelectFont(hdc, gFontTTF_40Bk);
 	}
 #endif
-	DrawText(hdc, strSysDia, -1, &gRCNibp_Inter, DT_NOCLIP | DT_BOTTOM | DT_CENTER | DT_SINGLELINE);
+
+	//显示/
+	DrawText(hdc, "/", -1, &gRCNibp_Inter, DT_NOCLIP | DT_BOTTOM | DT_CENTER | DT_SINGLELINE);
+
+	//显示 Sys
+	if((gbAlarmNibp_Sys)&& (gCfgNibp.bAlmControl != ALARM_OFF)){
+		if(bFlashSys){
+			SetTextColor(hdc, ALARMFLASH_COLOR);
+		}
+		else{
+			SetTextColor(hdc, gCfgNibp.iColor);		
+		}
+		bFlashSys = !bFlashSys;
+	}
+	else{
+		SetTextColor(hdc, gCfgNibp.iColor);			
+	}
+//	DrawText(hdc, strSysDia, -1, &gRCNibp_Inter, DT_NOCLIP | DT_BOTTOM | DT_CENTER | DT_SINGLELINE);
+	DrawText(hdc, strSys, -1, &gRCNibp_Sys, DT_NOCLIP | DT_BOTTOM | DT_CENTER | DT_SINGLELINE);
+	//显示 Dia
+	if((gbAlarmNibp_Dia)&& (gCfgNibp.bAlmControl != ALARM_OFF)){
+		if(bFlashDia){
+			SetTextColor(hdc, ALARMFLASH_COLOR);
+		}
+		else{
+			SetTextColor(hdc, gCfgNibp.iColor);		
+		}
+		bFlashDia = !bFlashDia;
+	}
+	else{
+		SetTextColor(hdc, gCfgNibp.iColor);			
+	}
+	DrawText(hdc, strDia, -1, &gRCNibp_Dia, DT_NOCLIP | DT_BOTTOM | DT_CENTER | DT_SINGLELINE);
+	
+
+	
+//Mean
 #if SCREEN_640
 	if(gCfgSystem.bInterface==SCREEN_BIGCHAR)
 		SelectFont(hdc, gFontTTF_40Bk);
@@ -1388,7 +1463,22 @@ static int ViewNibp(HDC hdc, BYTE bInterface, BOOL bMemCopy)
 	else
 		SelectFont(hdc, gFontTTF_30Bk);
 #endif
+
+//显示mean
+	if((gbAlarmNibp_Mean )&& (gCfgNibp.bAlmControl != ALARM_OFF)){
+		if(bFlashMean){
+			SetTextColor(hdc, ALARMFLASH_COLOR);
+		}
+		else{
+			SetTextColor(hdc, gCfgNibp.iColor);		
+		}
+		bFlashMean = !bFlashMean;
+	}
+	else{
+		SetTextColor(hdc, gCfgNibp.iColor);			
+	}
  	DrawText(hdc, strMean, -1, &gRCNibp_Mean, DT_NOCLIP | DT_CENTER | DT_BOTTOM | DT_SINGLELINE);
+
 
 	//Alarm Limit
 	SelectFont(hdc, gFontSmall);
@@ -1447,6 +1537,7 @@ static int ViewNibp(HDC hdc, BYTE bInterface, BOOL bMemCopy)
 	else
 		Rectangle(hdc, gRCNibp.left, gRCNibp.top, gRCNibp.right+5, gRCNibp.bottom);
 	
+	
 	if(bDebugRect){
 //NIBP Label
 	SetPenColor(hdc, COLOR_yellow);
@@ -1471,9 +1562,12 @@ static int ViewNibp(HDC hdc, BYTE bInterface, BOOL bMemCopy)
 //NIBP --/--
 	SetPenColor(hdc, COLOR_blue );
 	Rectangle(hdc, gRCNibp_Inter.left, gRCNibp_Inter.top, gRCNibp_Inter.right, gRCNibp_Inter.bottom);
+	Rectangle(hdc, gRCNibp_Sys.left, gRCNibp_Sys.top, gRCNibp_Sys.right, gRCNibp_Sys.bottom);
+	Rectangle(hdc, gRCNibp_Dia.left, gRCNibp_Dia.top, gRCNibp_Dia.right, gRCNibp_Dia.bottom);
 
 //NIBP Data -- Mean
 	Rectangle(hdc, gRCNibp_Mean.left, gRCNibp_Mean.top, gRCNibp_Mean.right, gRCNibp_Mean.bottom);
+
 	//lable sysdia
 	Rectangle(hdc, gRCNibp_label_SysDia.left, gRCNibp_label_SysDia.top, gRCNibp_label_SysDia.right, gRCNibp_label_SysDia.bottom);
 	//lable sysdia

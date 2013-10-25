@@ -36,7 +36,7 @@
 //调试输出
 #define	DEBUGINFO()		printf("%s-%s:%d\n", __FILE__, __func__, __LINE__)
 
-#define  B_PRINTF 	1
+#define  B_PRINTF 	0
 
 //显示屏幕
 #if SCREEN_1024
@@ -1164,8 +1164,18 @@ typedef struct {
 typedef struct {
 	WORD		wHead;	//循环数组首指针
 	BOOL		bFull;		//数组翻转标记
-	TRENDDATA	Datas[MAXSHORTTREND];		//短趋势数据
+	TRENDDATA   	Datas[MAXSHORTTREND];
 }CA_SHORTTREND, *PCA_SHORTTREND;
+
+//nibp数据连续最大存储数量
+#define MAXNIBPTREND		500	//500组	
+//nibp数据数组
+typedef struct {
+	WORD		wHead;	//循环数组首指针
+	S_TIME		sTime;		//存储趋势数据的时间(根据偏移量修正)
+	BOOL		bFull;		//数组翻转标记
+	NIBPDATA 	Datas[MAXNIBPTREND];		//数据
+}CA_NIBPTREND, *PCA_NIBPTREND;
 
 
 //趋势数据连续最大存储数量,单位:分钟

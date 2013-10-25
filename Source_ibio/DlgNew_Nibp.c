@@ -616,8 +616,6 @@ static int DrawIconProc(HWND hDlg)
 	
 	CreateWindow("static",gstrNextPage,WS_CHILD|WS_VISIBLE,IDC_STATIC,
  		150, 33+29*8, 30, 16,hDlg,0);
-	CreateWindow("static",gstrNextPage,WS_CHILD|WS_VISIBLE,IDC_STATIC,
- 		150, 33+29*7, 30, 16,hDlg,0);
 	
 	return(0);
 }
